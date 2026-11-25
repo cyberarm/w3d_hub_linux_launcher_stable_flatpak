@@ -1,0 +1,95 @@
+app-id: dev.cyberarm.w3d.launcher.stable
+runtime: org.freedesktop.Platform
+runtime-version: "26.08"
+sdk: org.freedesktop.Sdk
+build-options:
+  build-args:
+    - --share=network
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=dri
+  - --share=network
+  - --share=ipc
+  - --filesystem=host
+
+command: w3d_hub_linux_launcher.sh
+
+modules:
+  - name: libyaml #ruby
+    config-opts:
+      - --enable-static=no
+    sources:
+      - type: archive
+        url: https://github.com/yaml/libyaml/releases/download/0.2.7/yaml-0.2.7.tar.gz
+        sha256: 0c39256b8be0fc689f5c7bfdea1bc9f3fb1fd648468fd3cc6fd375e09ffb6f13
+
+  - name: ruby
+    config-opts:
+      - --enable-shared
+      - --disable-install-doc
+    sources:
+      - type: archive
+        url: https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.10.tar.gz
+        sha256: b53eef3371fa5d3e3b74340edcd015f06d5d8853968d4e539a5264fce41ed9f1
+        x-checker-data:
+          type: html
+          url: https://www.ruby-lang.org/en/downloads/
+          version-pattern: The current stable version is ([\d\.]+)\.
+          url-pattern: (https://cache.ruby-lang.org/pub/ruby/[\d\.]+/ruby-[\d\.]+.tar.gz)
+
+  - name: bundler
+    buildsystem: simple
+    build-commands:
+      - gem install --local bundler-4.1.0.gem --no-doc
+    sources:
+      - type: file
+        url: https://rubygems.org/downloads/bundler-4.1.0.gem
+        sha256: d7b7a797b988e544a0677a9c6ed78146f2f63d05ae1af8bc7d9426cf88b46377
+
+  - name: sdl3
+    buildsystem: cmake-ninja
+    builddir: true
+    cleanup:
+      - /include
+      - /lib/*.la
+      - /lib/*.a
+      - /lib/cmake
+      - /lib/pkgconfig
+      - /share/aclocal
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DCMAKE_INSTALL_LIBDIR:PATH=lib
+    sources:
+      - type: archive
+        url: https://github.com/libsdl-org/SDL/releases/download/release-3.4.20/SDL3-3.4.20.tar.gz
+        sha256: f3bb06f55bed9557227a700af2ea62e49497ebdf58037732a731a5fb3ef8581f
+        x-checker-data:
+          stable-only: true
+          versions:
+            <: 4.0.0
+          url-template: https://github.com/libsdl-org/SDL/releases/download/release-${version}/SDL3-${version}.tar.gz
+
+  - name: w3d_hub_linux_launcher
+    buildsystem: simple
+    build-commands:
+      - "ruby --version"
+      - "ls -lah"
+      - "bundle install"
+
+      - install -D w3d_hub_linux_launcher.sh /app/bin/w3d_hub_linux_launcher.sh
+      - ls -la /app/bin
+      - install -D w3d_hub_linux_launcher.rb /app/w3d_hub_linux_launcher/w3d_hub_linux_launcher.rb
+      - install -D Gemfile /app/w3d_hub_linux_launcher/Gemfile
+      - install -D Gemfile.lock /app/w3d_hub_linux_launcher/Gemfile.lock
+      - ls -la lib
+      - ls -la media
+      - cp -r lib/ /app/w3d_hub_linux_launcher/
+      - cp -r media/ /app/w3d_hub_linux_launcher/
+    sources:
+      - type: file
+        path: w3d_hub_linux_launcher.sh
+      - type: git
+        url: https://github.com/cyberarm/w3d_hub_linux_launcher
+        commit: 015cf166bcdcffb73516bb092d290962e19f2e0d
