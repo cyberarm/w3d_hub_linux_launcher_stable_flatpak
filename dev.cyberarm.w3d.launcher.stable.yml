@@ -85,11 +85,13 @@ modules:
       - install -D Gemfile.lock /app/w3d_hub_linux_launcher/Gemfile.lock
       - ls -la lib
       - ls -la media
+      - ls -la locales
       - cp -r lib/ /app/w3d_hub_linux_launcher/
       - cp -r media/ /app/w3d_hub_linux_launcher/
+      - cp -r locales/ /app/w3d_hub_linux_launcher/
     sources:
       - type: file
         path: w3d_hub_linux_launcher.sh
       - type: git
         url: https://github.com/cyberarm/w3d_hub_linux_launcher
-        commit: 015cf166bcdcffb73516bb092d290962e19f2e0d
+        commit: 0b264f25eb875e3678f3ddb192a9b0e2fe4ba073
