@@ -5,6 +5,8 @@ sdk: org.freedesktop.Sdk
 build-options:
   build-args:
     - --share=network
+    # LOCAL TESTING
+    # - --filesystem=host
 finish-args:
   - --socket=wayland
   - --socket=fallback-x11
@@ -13,6 +15,7 @@ finish-args:
   - --share=network
   - --share=ipc
   - --filesystem=host
+  - --talk-name=org.freedesktop.Flatpak
 
 command: w3d_hub_linux_launcher.sh
 
@@ -71,21 +74,29 @@ modules:
             <: 4.0.0
           url-template: https://github.com/libsdl-org/SDL/releases/download/release-${version}/SDL3-${version}.tar.gz
 
+  - name: rubygems
+    buildsystem: simple
+    build-commands:
+      - "bundle install"
+    sources:
+      - type: git
+        url: https://github.com/cyberarm/w3d_hub_linux_launcher
+        # Only update commit if gems have been updated
+        commit: a0905eee088a7086142fd34dc4c22cbc5507c580
+
   - name: w3d_hub_linux_launcher
     buildsystem: simple
     build-commands:
-      - "ruby --version"
-      - "ls -lah"
+      # LOCAL TESTING
+      # - cp -pr /home/cyberarm/Code/w3d_hub_linux_launcher_mk2/* .
+
+      # PRIME bundler
       - "bundle install"
 
       - install -D w3d_hub_linux_launcher.sh /app/bin/w3d_hub_linux_launcher.sh
-      - ls -la /app/bin
       - install -D w3d_hub_linux_launcher.rb /app/w3d_hub_linux_launcher/w3d_hub_linux_launcher.rb
       - install -D Gemfile /app/w3d_hub_linux_launcher/Gemfile
       - install -D Gemfile.lock /app/w3d_hub_linux_launcher/Gemfile.lock
-      - ls -la lib
-      - ls -la media
-      - ls -la locales
       - cp -r lib/ /app/w3d_hub_linux_launcher/
       - cp -r media/ /app/w3d_hub_linux_launcher/
       - cp -r locales/ /app/w3d_hub_linux_launcher/
@@ -94,4 +105,4 @@ modules:
         path: w3d_hub_linux_launcher.sh
       - type: git
         url: https://github.com/cyberarm/w3d_hub_linux_launcher
-        commit: 0b264f25eb875e3678f3ddb192a9b0e2fe4ba073
+        commit: a0905eee088a7086142fd34dc4c22cbc5507c580
